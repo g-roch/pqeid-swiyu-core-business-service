@@ -14,12 +14,12 @@ import ch.admin.eid.did_sidekicks.Jwk;
 import ch.admin.eid.did_sidekicks.VerificationMethod;
 import ch.admin.eid.did_sidekicks.VerificationType;
 import ch.admin.eid.didresolver.Did;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
-import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.crypto.MLDSAVerifier;
+import com.nimbusds.jose.jwk.JWK;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -28,6 +28,9 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.text.ParseException;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -104,6 +107,9 @@ public class DidPublicKeyLoader {
     private static JWSVerifier toJwsVerifier(PublicKey publicKey) throws JOSEException {
         if (publicKey instanceof ECPublicKey ecPublicKey) {
             return new ECDSAVerifier(ecPublicKey);
+        }
+        if (publicKey instanceof org.bouncycastle.jcajce.interfaces.MLDSAPublicKey) {
+            return new MLDSAVerifier(publicKey);
         }
         throw new IllegalArgumentException("Unsupported public key type: " + publicKey.getClass().getName());
     }
@@ -215,9 +221,24 @@ public class DidPublicKeyLoader {
             );
         }
         try {
-            String json = objectMapper.writeValueAsString(jwk);
-            return ECKey.parse(json).toECPublicKey();
-        } catch (JsonProcessingException | JOSEException | ParseException e) {
+            // PQEID: explicit field mapping instead of objectMapper.writeValueAsString(jwk) - the
+            // did_sidekicks.Jwk UniFFI/Kotlin data class's "pub" member (ML-DSA/AKP public key
+            // material) is exposed to Java as getPubKey(), which Jackson's default bean
+            // serialization would emit as "pubKey", not the "pub" JWK member name that
+            // JWK.parse()/MLDSAKey.parse() require. See IssuerPublicKeyLoader.parseJwk() in
+            // swiyu-verifier for the same fix.
+            Map<String, Object> json = new HashMap<>();
+            json.put("alg", jwk.getAlg());
+            json.put("kty", jwk.getKty());
+            json.put("crv", jwk.getCrv());
+            json.put("x", jwk.getX());
+            json.put("y", jwk.getY());
+            json.put("pub", jwk.getPubKey());
+            json.put("kid", jwk.getKid());
+            json.values().removeIf(Objects::isNull);
+            JWK parsed = JWK.parse(json);
+            return "AKP".equals(jwk.getKty()) ? parsed.toMLDSAKey().toPublicKey() : parsed.toECKey().toECPublicKey();
+        } catch (JOSEException | ParseException e) {
             throw new IllegalArgumentException("Failed to parse json web token", e);
         }
     }
