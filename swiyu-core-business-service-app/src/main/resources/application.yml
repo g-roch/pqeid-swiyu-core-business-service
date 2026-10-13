@@ -14,6 +14,8 @@ app:
     data-url-template: ${STATUS_REGISTRY_DATA_URL_TEMPLATE:}
   trust-registry:
     data-service-base-url: ${TRUST_REGISTRY_DATA_SERVICE_BASE_URL:}
+  signature:
+    accepted-algorithms: ${ACCEPTED_SIGNATURE_ALGORITHMS:ML-DSA-44,ML-DSA-65-ES256} # PQEID policy; contract = drop ML-DSA-44
   jobs:
     trust-additional-dids-submission-cleanup-interval: 1m
     trust-onboarding-submission-cleanup-interval: 1m

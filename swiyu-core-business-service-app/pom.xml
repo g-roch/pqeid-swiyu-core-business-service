@@ -135,6 +135,12 @@
             <artifactId>nimbus-jose-jwt</artifactId>
             <version>${nimbus-jose-jwt.version}</version>
         </dependency>
+        <!-- PQEID: shared verification (SignatureVerifiers: key type + algorithm policy) -->
+        <dependency>
+            <groupId>ch.admin.swiyu</groupId>
+            <artifactId>swiyu-jwt-util</artifactId>
+            <version>1.6.4</version>
+        </dependency>
         <!-- We need bouncy castle to load pem files with nimbus -->
         <dependency>
             <groupId>org.bouncycastle</groupId>

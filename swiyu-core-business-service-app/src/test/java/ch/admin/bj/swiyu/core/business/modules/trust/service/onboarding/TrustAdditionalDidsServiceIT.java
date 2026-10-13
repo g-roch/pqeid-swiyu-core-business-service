@@ -179,7 +179,7 @@ class TrustAdditionalDidsServiceIT {
         );
         var submissionId = submission.getId();
 
-        when(didPublicKeyLoader.loadPublicKey(permissionKeyId)).thenReturn(getVerifier(kpWrong.getPublic()));
+        when(didPublicKeyLoader.loadJWK(permissionKeyId)).thenReturn(getVerifier(kpWrong.getPublic()));
         var jwt = getPoPSubmission(sharedNonce, permissionDid, permissionKeyId, getSigner(kpPermission.getPrivate()));
         var dto = new TrustAdditionalDidsSubmissionUpdateRequestDto(List.of(jwt));
 
@@ -234,8 +234,8 @@ class TrustAdditionalDidsServiceIT {
         var submissionId = submission.getId();
         var beforeSubmit = Instant.now();
 
-        when(didPublicKeyLoader.loadPublicKey(permissionKeyId)).thenReturn(getVerifier(kpPermission.getPublic()));
-        when(didPublicKeyLoader.loadPublicKey(addKeyId)).thenReturn(getVerifier(kpAdd.getPublic()));
+        when(didPublicKeyLoader.loadJWK(permissionKeyId)).thenReturn(getVerifier(kpPermission.getPublic()));
+        when(didPublicKeyLoader.loadJWK(addKeyId)).thenReturn(getVerifier(kpAdd.getPublic()));
         var jwtPermission = getPoPSubmission(
             sharedNonce,
             permissionDid,

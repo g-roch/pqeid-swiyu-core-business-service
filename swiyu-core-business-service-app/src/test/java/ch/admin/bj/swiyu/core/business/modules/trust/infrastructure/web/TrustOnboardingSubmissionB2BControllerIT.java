@@ -202,7 +202,7 @@ class TrustOnboardingSubmissionB2BControllerIT {
         var signer1 = getSigner(kp1.getPrivate());
         var verifier1 = getVerifier(kp1.getPublic());
         var popStringList = Stream.of(getPoPSubmission(pop.nonce(), did, didWithFragment, signer1)).toList();
-        when(didPublicKeyLoader.loadPublicKey(didWithFragment)).thenReturn(verifier1);
+        when(didPublicKeyLoader.loadJWK(didWithFragment)).thenReturn(verifier1);
         var result = mockMvc
             .perform(
                 MockMvcRequestBuilders.post(TRUST_ONBOARDING_SUBMISSION_B2B_BASE_URL + "/proof-of-possessions")

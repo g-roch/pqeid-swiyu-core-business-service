@@ -155,7 +155,7 @@ class ProofOfPossessionValidatorTest {
         var kp1 = generateKeyPair();
         var signer1 = getSigner(kp1.getPrivate());
         var popStringList = Stream.of(getPoPSubmission(pop.getNonce(), did, didWithFragment, signer1)).toList();
-        when(didPublicKeyLoader.loadPublicKey(didWithFragment)).thenReturn(getVerifier(kp1.getPublic()));
+        when(didPublicKeyLoader.loadJWK(didWithFragment)).thenReturn(getVerifier(kp1.getPublic()));
         var pops = Stream.of(pop).toList();
         var errors = proofOfPossessionValidator.validateProofOfPossessionSubmissions(popStringList, pops);
         Assertions.assertThat(errors.hasErrors()).isFalse();
@@ -171,7 +171,7 @@ class ProofOfPossessionValidatorTest {
         var kp2 = generateKeyPair();
         var signer1 = getSigner(kp1.getPrivate());
         var popStringList = Stream.of(getPoPSubmission(pop.getNonce(), did, didWithFragment, signer1)).toList();
-        when(didPublicKeyLoader.loadPublicKey(didWithFragment)).thenReturn(getVerifier(kp2.getPublic()));
+        when(didPublicKeyLoader.loadJWK(didWithFragment)).thenReturn(getVerifier(kp2.getPublic()));
         var pops = Stream.of(pop).toList();
         var errors = proofOfPossessionValidator.validateProofOfPossessionSubmissions(popStringList, pops);
         var objectError = errors
@@ -191,7 +191,7 @@ class ProofOfPossessionValidatorTest {
         var kp1 = generateKeyPair();
         var signer1 = getSigner(kp1.getPrivate());
         var popStringList = Stream.of("somethinginvalid" + getPoPSubmission(pop.getNonce(), did, signer1)).toList();
-        when(didPublicKeyLoader.loadPublicKey(did)).thenReturn(getVerifier(kp1.getPublic()));
+        when(didPublicKeyLoader.loadJWK(did)).thenReturn(getVerifier(kp1.getPublic()));
         var pops = Stream.of(pop).toList();
         var errors = proofOfPossessionValidator.validateProofOfPossessionSubmissions(popStringList, pops);
         var objectError = errors
@@ -213,7 +213,7 @@ class ProofOfPossessionValidatorTest {
         var kp1 = generateKeyPair();
         var signer1 = getSigner(kp1.getPrivate());
         var popStringList = Stream.of(getPoPSubmission("", did, signer1)).toList();
-        when(didPublicKeyLoader.loadPublicKey(did)).thenReturn(getVerifier(kp1.getPublic()));
+        when(didPublicKeyLoader.loadJWK(did)).thenReturn(getVerifier(kp1.getPublic()));
         var pops = Stream.of(pop).toList();
         var errors = proofOfPossessionValidator.validateProofOfPossessionSubmissions(popStringList, pops);
         var objectError = errors
@@ -238,7 +238,7 @@ class ProofOfPossessionValidatorTest {
         var popStringList = Stream.of(
             getPoPSubmission(UUID.randomUUID().toString(), did, didWithFragment, signer1)
         ).toList();
-        when(didPublicKeyLoader.loadPublicKey(didWithFragment)).thenReturn(getVerifier(kp1.getPublic()));
+        when(didPublicKeyLoader.loadJWK(didWithFragment)).thenReturn(getVerifier(kp1.getPublic()));
         var pops = Stream.of(pop).toList();
         var errors = proofOfPossessionValidator.validateProofOfPossessionSubmissions(popStringList, pops);
         var objectError = errors
@@ -260,7 +260,7 @@ class ProofOfPossessionValidatorTest {
         var kp1 = generateKeyPair();
         var signer1 = getSigner(kp1.getPrivate());
         var popStringList = Stream.of(getPoPSubmission("definitely-not-an-uuid", did, signer1)).toList();
-        when(didPublicKeyLoader.loadPublicKey(did)).thenReturn(getVerifier(kp1.getPublic()));
+        when(didPublicKeyLoader.loadJWK(did)).thenReturn(getVerifier(kp1.getPublic()));
         var pops = Stream.of(pop).toList();
         var errors = proofOfPossessionValidator.validateProofOfPossessionSubmissions(popStringList, pops);
         var objectError = errors
@@ -290,7 +290,7 @@ class ProofOfPossessionValidatorTest {
                 Instant.now().minusSeconds(3600)
             )
         ).toList();
-        when(didPublicKeyLoader.loadPublicKey(didWithFragment)).thenReturn(getVerifier(kp1.getPublic()));
+        when(didPublicKeyLoader.loadJWK(didWithFragment)).thenReturn(getVerifier(kp1.getPublic()));
         var pops = Stream.of(pop).toList();
         var errors = proofOfPossessionValidator.validateProofOfPossessionSubmissions(popStringList, pops);
         var objectError = errors
@@ -320,7 +320,7 @@ class ProofOfPossessionValidatorTest {
                 Instant.now().plusSeconds(7200)
             )
         ).toList();
-        when(didPublicKeyLoader.loadPublicKey(didWithFragment)).thenReturn(getVerifier(kp1.getPublic()));
+        when(didPublicKeyLoader.loadJWK(didWithFragment)).thenReturn(getVerifier(kp1.getPublic()));
         var pops = Stream.of(pop).toList();
         var errors = proofOfPossessionValidator.validateProofOfPossessionSubmissions(popStringList, pops);
         var objectError = errors
@@ -350,7 +350,7 @@ class ProofOfPossessionValidatorTest {
                 Instant.now().plus(Duration.parse("PT25H"))
             )
         ).toList();
-        when(didPublicKeyLoader.loadPublicKey(didWithFragment)).thenReturn(getVerifier(kp1.getPublic()));
+        when(didPublicKeyLoader.loadJWK(didWithFragment)).thenReturn(getVerifier(kp1.getPublic()));
         var pops = Stream.of(pop).toList();
         var errors = proofOfPossessionValidator.validateProofOfPossessionSubmissions(popStringList, pops);
         var objectError = errors
@@ -382,7 +382,7 @@ class ProofOfPossessionValidatorTest {
                 Instant.now().plus(Duration.parse("PT22H"))
             )
         ).toList();
-        when(didPublicKeyLoader.loadPublicKey(didWithFragment)).thenReturn(getVerifier(kp1.getPublic()));
+        when(didPublicKeyLoader.loadJWK(didWithFragment)).thenReturn(getVerifier(kp1.getPublic()));
         var pops = Stream.of(pop).toList();
         var errors = proofOfPossessionValidator.validateProofOfPossessionSubmissions(popStringList, pops);
         Assertions.assertThat(errors.hasErrors()).isFalse();

@@ -291,14 +291,14 @@ class TrustOnboardingServiceIT {
         var signer1 = getSigner(kp1.getPrivate());
         var verifier1 = getVerifier(kp1.getPublic());
         pops.add(getPoPSubmission(pop1.nonce(), pop1.did(), pop1.did() + "#suffix", signer1));
-        when(didPublicKeyLoader.loadPublicKey(pop1.did() + "#suffix")).thenReturn(verifier1);
+        when(didPublicKeyLoader.loadJWK(pop1.did() + "#suffix")).thenReturn(verifier1);
 
         var pop2 = resultDto.proofOfPossessions().getLast();
         var kp2 = generateKeyPair();
         var signer2 = getSigner(kp2.getPrivate());
         var verifier2 = getVerifier(kp2.getPublic());
         pops.add(getPoPSubmission(pop2.nonce(), pop2.did(), pop2.did() + "#suffix", signer2));
-        when(didPublicKeyLoader.loadPublicKey(pop2.did() + "#suffix")).thenReturn(verifier2);
+        when(didPublicKeyLoader.loadJWK(pop2.did() + "#suffix")).thenReturn(verifier2);
 
         service.submitProofOfPossessions(resultDto.partnerId(), pops);
         var updated = repos.trustOnboardingSubmission.findById(resultDto.id());
@@ -396,7 +396,7 @@ class TrustOnboardingServiceIT {
             var signer = getSigner(kp.getPrivate());
             var verifier = getVerifier(kp.getPublic());
             popsForSubmission.add(getPoPSubmission(pop.nonce(), pop.did(), pop.did() + "#suffix", signer));
-            when(didPublicKeyLoader.loadPublicKey(pop.did() + "#suffix")).thenReturn(verifier);
+            when(didPublicKeyLoader.loadJWK(pop.did() + "#suffix")).thenReturn(verifier);
         }
         // WHEN Submitting valid pops
         var resultDto2 = service.submitProofOfPossessions(resultDto.partnerId(), popsForSubmission);
@@ -439,7 +439,7 @@ class TrustOnboardingServiceIT {
         var signer1 = getSigner(kp1.getPrivate());
         var verifier1 = getVerifier(kp1.getPublic());
         popsForSubmission.add(getPoPSubmission(pop1.nonce(), pop1.did(), pop1.did() + "#suffix", signer1));
-        when(didPublicKeyLoader.loadPublicKey(pop1.did() + "#suffix")).thenReturn(verifier1);
+        when(didPublicKeyLoader.loadJWK(pop1.did() + "#suffix")).thenReturn(verifier1);
         // Valid signature but invalid nonce
         var pop2 = originalPoPs.getLast();
         var kp2 = generateKeyPair();
@@ -448,7 +448,7 @@ class TrustOnboardingServiceIT {
         popsForSubmission.add(
             getPoPSubmission(UUID.randomUUID().toString(), pop2.did(), pop2.did() + "#suffix", signer2)
         );
-        when(didPublicKeyLoader.loadPublicKey(pop2.did() + "#suffix")).thenReturn(verifier2);
+        when(didPublicKeyLoader.loadJWK(pop2.did() + "#suffix")).thenReturn(verifier2);
 
         // WHEN Submitting partial valid pops
         var partnerId = resultDto.partnerId();

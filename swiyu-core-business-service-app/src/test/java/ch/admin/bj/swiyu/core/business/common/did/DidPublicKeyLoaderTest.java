@@ -42,7 +42,7 @@ class DidPublicKeyLoaderTest {
 
         // WHEN / THEN
         Assertions.assertDoesNotThrow(() ->
-            publicKeyLoader.loadPublicKey(StatusTestData.VALID_STATUS_LIST_ISSUER_A_KID)
+            publicKeyLoader.loadJWK(StatusTestData.VALID_STATUS_LIST_ISSUER_A_KID)
         );
     }
 }

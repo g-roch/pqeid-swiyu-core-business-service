@@ -15,14 +15,9 @@ import ch.admin.eid.did_sidekicks.VerificationMethod;
 import ch.admin.eid.did_sidekicks.VerificationType;
 import ch.admin.eid.didresolver.Did;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.crypto.ECDSAVerifier;
-import com.nimbusds.jose.crypto.MLDSAVerifier;
 import com.nimbusds.jose.jwk.JWK;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
@@ -80,7 +75,7 @@ public class DidPublicKeyLoader {
      * @return the public key encoded according to the X.509 standard
      * @throws IllegalArgumentException if the key generation fails due to an invalid key specification or missing algorithm
      */
-    private static PublicKey parsePublicKeyOfTypeMultibaseKey(String multibaseKey) {
+    private static JWK parsePublicKeyOfTypeMultibaseKey(String multibaseKey) {
         if (!hasText(multibaseKey)) {
             throw new IllegalArgumentException(
                 "Failed to parse multibase key from verification method since no multibase key was provided"
@@ -90,7 +85,9 @@ public class DidPublicKeyLoader {
             var decodedKey = decodeMultibaseKey(multibaseKey);
             var keyFactory = KeyFactory.getInstance("EC");
             var keySpec = new X509EncodedKeySpec(decodedKey);
-            return keyFactory.generatePublic(keySpec);
+            var publicKey = (java.security.interfaces.ECPublicKey) keyFactory.generatePublic(keySpec);
+            // PQEID: Multikey is EC-only here; returned as a JWK so the algorithm policy decides (refuses it)
+            return new com.nimbusds.jose.jwk.ECKey.Builder(com.nimbusds.jose.jwk.Curve.P_256, publicKey).build();
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalArgumentException(
                 "Failed to generate public key from specification due to missing algorithm",
@@ -104,32 +101,19 @@ public class DidPublicKeyLoader {
         }
     }
 
-    private static JWSVerifier toJwsVerifier(PublicKey publicKey) throws JOSEException {
-        if (publicKey instanceof ECPublicKey ecPublicKey) {
-            return new ECDSAVerifier(ecPublicKey);
-        }
-        if (publicKey instanceof org.bouncycastle.jcajce.interfaces.MLDSAPublicKey) {
-            return new MLDSAVerifier(publicKey);
-        }
-        throw new IllegalArgumentException("Unsupported public key type: " + publicKey.getClass().getName());
-    }
-
     /**
      * Loads the public key of the issuer with the given <code>issuer</code> and <code>kid</code>.
      *
      * @return The public key of the issuer.
      * @throws DidResolveException if the public key could not be loaded
      */
-    public JWSVerifier loadPublicKey(String kid) throws DidResolveException {
+    public JWK loadJWK(String kid) throws DidResolveException {
         try {
             log.trace("Fetching Public Key for issuer {}", kid);
             VerificationMethod method = loadVerificationMethod(kid);
-            return toJwsVerifier(parsePublicKey(method));
+            return parsePublicKey(method);
         } catch (RuntimeException e) {
-            throw new DidResolveException(kid, "Failed to lookup public key from JWT Token", e);
-        } catch (JOSEException e) {
-            throw new DidResolveException(kid, "Could not parse public key.", e);
-        }
+            throw new DidResolveException(kid, "Failed to lookup public key from JWT Token", e);}
     }
 
     /**
@@ -196,7 +180,7 @@ public class DidPublicKeyLoader {
      * @throws IllegalArgumentException if the key generation fails due to an invalid key specification,
      *                                  missing algorithm or unsupported encoding type
      */
-    private PublicKey parsePublicKey(VerificationMethod method) {
+    private JWK parsePublicKey(VerificationMethod method) {
         return switch (method.getVerificationType()) {
             case VerificationType.MULTIKEY -> parsePublicKeyOfTypeMultibaseKey(method.getPublicKeyMultibase());
             case VerificationType.JSON_WEB_KEY2020 -> parsePublicKeyOfTypeJsonWebKey(method.getPublicKeyJwk());
@@ -214,7 +198,7 @@ public class DidPublicKeyLoader {
      * @param jwk a json web token
      * @return the public key
      */
-    private PublicKey parsePublicKeyOfTypeJsonWebKey(Jwk jwk) {
+    private JWK parsePublicKeyOfTypeJsonWebKey(Jwk jwk) {
         if (jwk == null) {
             throw new IllegalArgumentException(
                 "Failed to parse Json Web Key from verification method since no jwk was provided"
@@ -236,9 +220,8 @@ public class DidPublicKeyLoader {
             json.put("pub", jwk.getPubKey());
             json.put("kid", jwk.getKid());
             json.values().removeIf(Objects::isNull);
-            JWK parsed = JWK.parse(json);
-            return "AKP".equals(jwk.getKty()) ? parsed.toMLDSAKey().toPublicKey() : parsed.toECKey().toECPublicKey();
-        } catch (JOSEException | ParseException e) {
+            return JWK.parse(json);
+        } catch (ParseException e) {
             throw new IllegalArgumentException("Failed to parse json web token", e);
         }
     }

@@ -264,7 +264,7 @@
                     "$comment": "The publicKeyJwk property is OPTIONAL. If present, the value MUST be a map representing a JSON Web Key that conforms to [RFC7517]. CAUTION (e-ID conformity): Although the 'publicKeyJwk' property is REQUIRED (not OPTIONAL) in e-ID, it is kept as OPTIONAL (not REQUIRED) for the sake of being able to validate test vectors from third parties."
                   },
                   {
-                    "description": "PQEID: ML-DSA (module-lattice-based digital signature algorithm, FIPS 204), represented as an AKP (Algorithm Key Pair) JWK per draft-ietf-jose-fully-specified-algorithms / draft-bhatia-jose-akp-jose-akp.",
+                    "description": "PQEID: ML-DSA or composite ML-DSA-65-ES256 (module-lattice-based digital signature algorithm, FIPS 204), represented as an AKP (Algorithm Key Pair) JWK per draft-ietf-jose-fully-specified-algorithms / draft-bhatia-jose-akp-jose-akp.",
                     "type": "object",
                     "properties": {
                       "kty": {
@@ -277,7 +277,8 @@
                         "enum": [
                           "ML-DSA-44",
                           "ML-DSA-65",
-                          "ML-DSA-87"
+                          "ML-DSA-87",
+                          "ML-DSA-65-ES256"
                         ],
                         "$comment": "Identifies the algorithm intended for use with the key. REQUIRED for AKP JWKs, since 'kty' alone does not determine the ML-DSA parameter set."
                       },
