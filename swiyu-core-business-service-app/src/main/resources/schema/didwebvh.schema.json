@@ -20,7 +20,7 @@
       "properties": {
         "method": {
           "type": "string",
-          "const": "did:webvh:1.0",
+          "enum": ["did:webvh:1.0", "did:webvh:1.0-pqeid"],
           "$comment": "Specifies the did:webvh [SEMVER] specification version to be used for processing the DID’s log. Each acceptable value in turn defines what cryptographic algorithms are permitted for the current and subsequent DID log entries. An update to the specification version in the middle of a DID Log could introduce new parameters."
         },
         "scid": {
@@ -338,7 +338,7 @@
             "const": "DataIntegrityProof"
           },
           "cryptosuite": {
-            "const": "eddsa-jcs-2022"
+            "enum": ["eddsa-jcs-2022", "mldsa65-ed25519-jcs-pqeid"]
           },
           "verificationMethod": {
             "type": "string",
